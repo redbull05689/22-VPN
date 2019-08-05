@@ -1,0 +1,7 @@
+---
+- hosts: ovs
+  become: true
+  gather_facts: true
+  roles:
+    - {role: openvpn-server, clients: [client1, client2, ovc],
+                        openvpn_port: 1192}

@@ -1,0 +1,16 @@
+---
+# handlers file for arillso.openvpn
+
+- name: restart openvpn
+  become: true
+  systemd:
+    name: openvpn
+    state: restarted
+    enabled: true
+
+- name: start openvpn
+  become: true
+  systemd:
+    name: openvpn
+    state: started
+    enabled: true

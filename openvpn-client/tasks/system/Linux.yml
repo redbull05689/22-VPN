@@ -1,0 +1,35 @@
+---
+# tasks file for arillso.openvpn
+
+- name: Install EPEL
+  package:
+    name: epel-release
+    state: present
+  when: ansible_distribution == "CentOS" or ansible_distribution=="RedHat"
+
+- name: Install python2-dnf for Fedora dnf support
+  raw: dnf install -y python2-dnf
+  when:
+    - ansible_distribution == "Fedora"
+    - ansible_python.version.major == 2
+  register: fedora_dnf
+  changed_when: '"Nothing to do." not in fedora_dnf.stdout'
+
+- name: install openvpn
+  become: true
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items: "{{ openvpn_packages }}"
+  tags:
+    - packages
+
+- name: Create OpenVPN config file
+  become: true
+  template:
+    src: client.conf.j2
+    dest: "/etc/openvpn/{{ openvpn_name }}.conf"
+    mode: 0640
+  notify: restart openvpn
+  tags:
+    - configuration

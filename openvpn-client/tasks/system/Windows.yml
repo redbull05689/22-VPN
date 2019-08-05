@@ -1,0 +1,47 @@
+---
+# tasks file for arillso.openvpn
+
+- name: gather facts from chocolatey
+  win_chocolatey_facts:
+  when: ansible_chocolatey is undefined
+  tags:
+    - configuration
+    - packages
+
+- block:
+
+    - name: Install openvpn
+      win_chocolatey:
+        name: openvpn
+        state: latest
+      tags:
+        - packages
+
+    - name: Create OpenVPN config file
+      win_template:
+        src: client.conf.j2
+        dest: "C:\\Program Files\\OpenVPN\\config\\{{ openvpn_name }}.ovpn"
+      tags:
+        - configuration
+
+    - block:
+
+        - name: Stop and Disabled OpenVPN Service Interactive
+          win_service:
+            name: OpenVPNServiceInteractive
+            start_mode: disabled
+            state: stopped
+
+        - name: Start OpenVPN as Service
+          win_service:
+            name: OpenVPNService
+            start_mode: auto
+            state: started
+
+      when: openvpn_client_as_service
+      tags:
+        - configuration
+
+  when: >
+    openvpn_client_enabled and (chocolatey_packages is undefined or chocolatey_packages['openvpn'] is defined) or
+    chocolatey_packages is defined and chocolatey_packages['openvpn'] is defined

@@ -1,0 +1,6 @@
+---
+- hosts: ovc
+  become: true
+  gather_facts: true
+  roles:
+     - openvpn-client

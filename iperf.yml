@@ -1,0 +1,48 @@
+---
+- name: iperf
+  hosts: lab22
+  become: yes
+  tasks:
+   - name: Install IPERF
+     yum:
+       name: 
+       
+       - iperf3 
+       state: latest
+
+  #  - firewalld:
+  #    service: https
+  #    permanent: yes
+  #    state: enabled
+
+   - firewalld:
+     port: 5201
+     permanent: yes
+     state: enabled
+     when: ansible_hostname == "ovs"
+
+  #  - firewalld:
+  #    port: 5201
+  #    permanent: yes
+  #    state: enabled
+
+   - name: Start server
+     block:
+     - name: start iperf server
+       shell:
+         iperf3 -s 
+    
+     when: ansible_hostname == "ovs" 
+
+   - name: Start on client side
+     block:
+     - name: start iperf client
+       shell:
+         iperf3 -c 10.9.0.1
+       register: result
+
+     - debug:
+        var: result.stdout_lines
+        verbosity: 2
+    
+     when: ansible_hostname == "ovc"     
